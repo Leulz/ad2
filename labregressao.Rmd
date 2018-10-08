@@ -11,7 +11,7 @@ library(ggplot2)
 library(dplyr)
 library(caret)
 library(lattice)
-library('e1071')
+library(e1071)
 
 dados2006 = read.csv('eleicoes_2006.csv')
 dados2010 = read.csv('eleicoes_2010.csv')
@@ -129,7 +129,7 @@ dados2006_2010$total_despesa = dados2006_2010$total_despesa^(1/3)
 dados2006_2010$votos = dados2006_2010$votos^(1/3)
 ```
 
-Façamos agora uma regressão múltipla com os dados mais normalizados para ver se tal modelo é plausível:
+Façamos agora uma regressão múltipla com os dados mais normalizados para ver se tal modelo é plausível. Note que não levamos em consideração as variáveis categóricas, somente as quantitativas normalizadas acima:
 
 ```{r}
 mult2006 = lm(votos ~ quantidade_doacoes + quantidade_doadores + total_receita + media_receita + recursos_de_outros_candidatos.comites + recursos_de_pessoas_fisicas + recursos_de_pessoas_juridicas + recursos_proprios + recursos_de_partido_politico + quantidade_despesas + quantidade_fornecedores + total_despesa, data=dados2006)
@@ -163,7 +163,11 @@ Com os dados mais normalizados, podemos prosseguir e verificar quais variáveis 
 print(round(cor(select(dados2006, -ano, -sequencial_candidato, -nome, -uf, -partido, -cargo, -sexo, -grau, -estado_civil, -ocupacao)),3)[,"votos"] > 0.95)
 ```
 
-Vemos que não há nenhuma variável com uma correlação forte com os votos.
+Vemos que não há nenhuma variável com uma correlação forte com os votos. Para os dados de 2010, temos:
+
+```{r}
+print(round(cor(select(dados2010, -ano, -sequencial_candidato, -nome, -uf, -partido, -cargo, -sexo, -grau, -estado_civil, -ocupacao)),3)[,"votos"] > 0.95)
+```
 
 Vamos ver os valores de fato das correlações para ver se há algum indicativo de que uma das variáveis tem uma correlação relevante com o número de votos para as eleições de 2006:
 
