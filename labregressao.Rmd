@@ -129,12 +129,11 @@ dados2006_2010$total_despesa = dados2006_2010$total_despesa^(1/3)
 dados2006_2010$votos = dados2006_2010$votos^(1/3)
 ```
 
-Façamos agora uma regressão múltipla com os dados mais normalizados para ver se tal modelo é plausível. Note que não levamos em consideração as variáveis categóricas, somente as quantitativas normalizadas acima:
+Façamos agora uma regressão múltipla com os dados mais normalizados para ver se tal modelo é plausível. Note que não levamos em consideração as variáveis categóricas, somente as quantitativas normalizadas acima. Julguei que o sumário dos dados fica muito convoluto quando se inclui as variáveis categóricas, e o R-squared cai consideravelmente.
 
 ```{r}
 mult2006 = lm(votos ~ quantidade_doacoes + quantidade_doadores + total_receita + media_receita + recursos_de_outros_candidatos.comites + recursos_de_pessoas_fisicas + recursos_de_pessoas_juridicas + recursos_proprios + recursos_de_partido_politico + quantidade_despesas + quantidade_fornecedores + total_despesa, data=dados2006)
 summary(mult2006)
-#print(coef(mult)[''])
 ```
 
 O R-squared ajustado é de 0.7775, o que é considerável, e indica que a regressão múltipla prediz razoavelmente bem a variação da quantidade de votos.
