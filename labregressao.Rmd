@@ -264,3 +264,38 @@ Temos então um modelo com R-squared ajustado de 0.7908, o que é bastante perto
 
 Temos para os dados de 2010 também a curiosa inversão do impacto negativo de total_receita para um impacto positivo.
 
+## 5 - Construa agora uma regressão considerando os anos 2006 e 2010 em conjunto. Que diferenças/semelhanças você percebe em relação aos modelos individuais por ano?
+
+Usaremos as mesmas variáveis inicialmente selecionadas para os modelos de 2006 e de 2010:
+
+```{r}
+mult2006_2010 = lm(votos ~ quantidade_doacoes + quantidade_doadores + total_receita + media_receita + recursos_de_outros_candidatos.comites + recursos_de_pessoas_fisicas + recursos_de_pessoas_juridicas + recursos_proprios + recursos_de_partido_politico + quantidade_despesas + quantidade_fornecedores + total_despesa, data=dados2006_2010)
+summary(mult2006_2010)
+```
+
+Nota-se um valor de R-squared ajustado bastante semelhante ao do modelo de 2006. As variáveis com p-valor baixo são quantidade_doacoes, quantidade_doadores e quantidade_despesas. Vejamos se as variáveis com correlação forte entre si permanecem as mesmas:
+
+```{r}
+print(round(cor(select(dados2006_2010, -ano, -sequencial_candidato, -nome, -uf, -partido, -cargo, -sexo, -grau, -estado_civil, -ocupacao)),3) > 0.95)
+```
+
+Vendo isso, temos os mesmos pares de relações com correlação alta que tínhamos para os dados de 2006 e de 2010.
+
+Nota-se que total_receita tem impacto negativo no modelo atualmente. Removamos as variáveis redundantes e com p-valor baixo para ver se isso muda:
+
+```{r}
+mult2006_2010_modificado = lm(votos ~ total_receita + media_receita + recursos_de_outros_candidatos.comites + recursos_de_pessoas_fisicas + recursos_de_pessoas_juridicas + recursos_proprios + recursos_de_partido_politico + quantidade_fornecedores, data=dados2006_2010)
+summary(mult2006_2010_modificado)
+```
+
+Agora temos total_receita com um valor positivo, como também aconteceu ao se ajustar os modelos anteriores.
+
+Por fim, vejamos o plot dos resíduos:
+
+```{r}
+plot(mult2006_modificado, pch=16, which=1)
+plot(mult2010_modificado, pch=16, which=1)
+plot(mult2006_2010_modificado, pch=16, which=1)
+```
+
+A parte mais à direita do plot de 2006 e 2010, mais esparsa, parece mais com a mesma parte do plot de 2010; enquanto que a parte mais à esquerda, mais estreita, parece mais com a mesma parte do plot de 2006.

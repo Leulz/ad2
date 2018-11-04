@@ -1,0 +1,86 @@
+---
+title: "Lab Regressão 2"
+author: "Léo Meira Vital"
+date: "4 de novembro de 2018"
+output: html_document
+---
+
+Antes de qualquer coisa, vamos carregar os dados:
+
+```{r}
+dados <- read.csv('eleicoes_2006_e_2010.csv')
+library('caret')
+```
+
+## 1 - Usando todas as variáveis disponíveis, tune (usando validação cruzada): (i) um modelo de regressão Ridge, (ii) um modelo de regressão Lasso e (iii) um modelo KNN. Para os modelos de regressão linear, o parâmetro a ser tunado é o lambda (penalização dos coeficientes) e o KNN o número de vizinhos. (9 pts.)
+
+Primeiro, vejamos o modelo de regressão Ridge. Normalizaremos os dados com a transformação cúbica antes de treinarmos o modelo.
+
+```{r}
+dados$quantidade_doacoes = dados$quantidade_doacoes^(1/3)
+dados$quantidade_doadores = dados$quantidade_doadores^(1/3)
+dados$total_receita = dados$total_receita^(1/3)
+dados$media_receita = dados$media_receita^(1/3)
+dados$recursos_de_outros_candidatos.comites = dados$recursos_de_outros_candidatos.comites^(1/3)
+dados$recursos_de_pessoas_fisicas = dados$recursos_de_pessoas_fisicas^(1/3)
+dados$recursos_de_pessoas_juridicas = dados$recursos_de_pessoas_juridicas^(1/3)
+dados$recursos_proprios = dados$recursos_proprios^(1/3)
+dados$recursos_de_partido_politico = dados$recursos_de_partido_politico^(1/3)
+dados$quantidade_despesas = dados$quantidade_despesas^(1/3)
+dados$quantidade_fornecedores = dados$quantidade_fornecedores^(1/3)
+dados$total_despesa = dados$total_despesa^(1/3)
+dados$votos = dados$votos^(1/3)
+
+fitControl <- trainControl(method = "cv",
+                           number = 10,
+                           repeats = 10)
+#lambdaGrid <- expand.grid(lambda = 10^seq(10, -2, length=100))
+modelRidge <- train(votos ~ quantidade_doacoes + quantidade_doadores + total_receita + media_receita + recursos_de_outros_candidatos.comites + recursos_de_pessoas_fisicas + recursos_de_pessoas_juridicas + recursos_proprios + recursos_de_partido_politico + quantidade_despesas + quantidade_fornecedores + total_despesa + grau + sexo + estado_civil, 
+               data = dados,
+               method = "ridge",
+               trControl = fitControl,
+               na.action = na.omit)
+print(varImp(modelRidge))
+print(modelRidge)
+```
+O modelo selecionado teve lambda 0 e R-squared no valor de 0.7691479. O RMSE foi 0.2802773.
+
+Agora, vejamos o modelo de regressão Lasso para os dados:
+
+```{r}
+modelLasso <- train(votos ~ quantidade_doacoes + quantidade_doadores + total_receita + media_receita + recursos_de_outros_candidatos.comites + recursos_de_pessoas_fisicas + recursos_de_pessoas_juridicas + recursos_proprios + recursos_de_partido_politico + quantidade_despesas + quantidade_fornecedores + total_despesa + grau + sexo + estado_civil, 
+               data = dados,
+               method = "lasso",
+               trControl = fitControl,
+               na.action = na.omit)
+print(varImp(modelLasso))
+print(modelLasso)
+```
+
+A fração escolhida para o modelo Lasso foi 0.9, e o R-squared correspondente foi de 0.7688710, praticamente o mesmo que o R-squared do modelo Ridge. O RMSE foi 0.2801086.
+
+Por fim, para o KNN, temos:
+
+```{r}
+modelKNN <- train(votos ~ quantidade_doacoes + quantidade_doadores + total_receita + media_receita + recursos_de_outros_candidatos.comites + recursos_de_pessoas_fisicas + recursos_de_pessoas_juridicas + recursos_proprios + recursos_de_partido_politico + quantidade_despesas + quantidade_fornecedores + total_despesa + grau + sexo + estado_civil, 
+               data = dados,
+               method = "knn",
+               trControl = fitControl,
+               na.action = na.omit)
+print(varImp(modelKNN))
+print(modelKNN)
+```
+O modelo final usou K = 9 e teve R-squared com o valor de 0.7602301. O RMSE foi 0.2854798.
+
+## 2- Compare os três modelos em termos do erro RMSE de validação cruzada. (9 pts.)
+
+Os RMSE foram:
+Ridge = 0.2802773
+Lasso = 0.2801086
+KNN = 0.2854798
+
+Para um mesmo conjuntos de dados, podemos dizer que num geral quanto menor o RMSE melhor o modelo, pois indica que o modelo se aproxima aos dados reais em suas estimativas. Portanto, o modelo Lasso é o melhor dos 3, sendo ligeiramente melhor que o Ridge. Todavia, vale notar que o R-squared do Ridge é ligeiramente maior que o do Lasso.
+
+## 3- Quais as variáveis mais importantes segundo o modelo de regressão Ridge e Lasso?  Variáveis foram descartadas pelo Lasso? Quais? (9 pts.)
+
+# Dúvida: varimp está retornando a mesma coisa para todos os modelos.
